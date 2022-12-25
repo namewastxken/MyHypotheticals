@@ -1,0 +1,20 @@
+{
+    "manifest_version": 3,
+    "name": "MyHypotheticals",
+    "version": "1.0",
+    "description": "Allow yourself to create hypotheticals for MyCourses",
+    "icons": {
+        "16": "images/icon-16.png",
+        "32": "images/icon-32.png",
+        "48": "images/icon-48.png",
+        "128": "images/icon-128.png"
+    },
+    "content_scripts": [
+        {
+          "js": ["lib/jquery-3.6.3.js", "scripts/content.js"],
+          "matches": [
+            "https://mycourses.rit.edu/d2l/lms/grades/my_grades/*"
+          ]
+        }
+      ]
+}
