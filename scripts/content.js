@@ -33,14 +33,23 @@ body.click(function(event) {
         const args = text.split("/");
         const earned = args[0].trim();
         const worth = args[1].trim();
+        const old = earned;
+
+        // var next = clicked.nextSibling;
+        //
+        // if(next.nodeType === Node.TEXT_NODE) {
+        //     // is text?
+        //     var nt = next.nodeValue;
+        //     console.log(nt);
+        // }
 
         // let newGrade = prompt("What points would you like to have on this?");
         var newGrade = null;
         var input = document.createElement("input");
         input.style.height = "30px";
         input.style.width = "30px";
-        input.addEventListener("keydown", function (event) {
-            if(event.keyCode === 13) {
+        input.onkeydown = function (event) {
+            if(event.key === "Enter") {
                 // if enter key
                 newGrade = parseFloat(event.target.value);
                 if(isNaN(newGrade)) {
@@ -53,23 +62,29 @@ body.click(function(event) {
                     jQuery(clicked).text(newGrade + " / " + worth);
                 }
             }
-        })
+        }
+
+        // event listener on when a person clicks away.
+        // prevent clutter and other nastiness when clicking away.
+        input.onblur = function (event) {
+            // possible is the variable for the possible grade input that a student could've
+            // inputted but not pressed "enter" to traditionally calculate.
+            // as of right now think i should process
+            var possible = event.target.value;
+            console.log(possible);
+            if(possible === null || isNaN(possible)) {
+                input.remove();
+                jQuery(clicked).text(old + " / " + worth);
+            } else {
+                input.remove();
+                jQuery(clicked).text(newGrade + " / " + worth);
+            }
+        }
         input.type = "text";
 
         input.placeholder = earned;
         jQuery(clicked).text("   / " + worth);
         clicked.prepend(input);
         input.focus();
-
-        // if(newGrade == null) {
-        //     return;
-        // }
-        //
-        // newGrade = Number.parseFloat(newGrade)
-        // if(isNaN(newGrade)) {
-        //     alert("Improper input! Please insert a numerical value.");
-        // } else {
-        //     jQuery(clicked).text(newGrade + " / " + worth);
-        // }
     }
 });
