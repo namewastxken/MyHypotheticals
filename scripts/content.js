@@ -34,16 +34,42 @@ body.click(function(event) {
         const earned = args[0].trim();
         const worth = args[1].trim();
 
-        let newGrade = prompt("What points would you like to have on this?");
+        // let newGrade = prompt("What points would you like to have on this?");
+        var newGrade = null;
+        var input = document.createElement("input");
+        input.style.height = "30px";
+        input.style.width = "30px";
+        input.addEventListener("keydown", function (event) {
+            if(event.keyCode === 13) {
+                // if enter key
+                newGrade = parseFloat(event.target.value);
+                if(isNaN(newGrade)) {
+                    // if input is invalid, return to already set grade
+                    input.remove();
+                    jQuery(clicked).text(earned + " / " + worth);
+                    alert("You didn't input a valid grade. Replaced to old.");
+                } else {
+                    input.remove();
+                    jQuery(clicked).text(newGrade + " / " + worth);
+                }
+            }
+        })
+        input.type = "text";
 
-        if(newGrade == null) {
-            return;
-        }
-        newGrade = Number.parseFloat(newGrade)
-        if(isNaN(newGrade)) {
-            alert("Improper input! Please insert a numerical value.");
-        } else {
-            jQuery(clicked).text(newGrade + " / " + worth);
-        }
+        input.placeholder = earned;
+        jQuery(clicked).text("   / " + worth);
+        clicked.prepend(input);
+        input.focus();
+
+        // if(newGrade == null) {
+        //     return;
+        // }
+        //
+        // newGrade = Number.parseFloat(newGrade)
+        // if(isNaN(newGrade)) {
+        //     alert("Improper input! Please insert a numerical value.");
+        // } else {
+        //     jQuery(clicked).text(newGrade + " / " + worth);
+        // }
     }
 });
