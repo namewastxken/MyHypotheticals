@@ -1,5 +1,25 @@
-$('body').click(function(event) {
-    let log = $('#log');
+
+const body = $('body')
+
+let hasTotalGradeDisplayed = body.text().includes("Final Calculated Grade");
+console.log(hasTotalGradeDisplayed)
+
+/**
+ * a prepended informational booth injected into the site
+ * since it has not been added by the instructor
+ */
+if (!hasTotalGradeDisplayed) {
+    // started the way to input final calculated grade if not already provided.
+    const gradePageHeader = $('#d_page_title');
+    console.log(gradePageHeader);
+
+    const calculatedGradeHeader = $('<br><br><h2 class="dhdg_1 vui-heading-2">Final Calculated Grade</h2>');
+    gradePageHeader.append(calculatedGradeHeader);
+
+    console.log("prepended?");
+}
+
+body.click(function(event) {
     let clicked = event.target;
     let text = jQuery(clicked).text();
 
@@ -11,11 +31,10 @@ $('body').click(function(event) {
     if (text.includes("/") && text.length <= 12) {
 
         const args = text.split("/");
-        var earned = args[0].trim();
-        var worth = args[1].trim();
-        console.log("earned: " + earned);
-        console.log("worth: " + worth);
-        var newGrade = prompt("What points would you like to have on this?");
+        const earned = args[0].trim();
+        const worth = args[1].trim();
+
+        let newGrade = prompt("What points would you like to have on this?");
 
         if(newGrade == null) {
             return;
