@@ -11,12 +11,8 @@ console.log(hasTotalGradeDisplayed)
 if (!hasTotalGradeDisplayed) {
     // started the way to input final calculated grade if not already provided.
     const gradePageHeader = $('#d_page_title');
-    console.log(gradePageHeader);
-
     const calculatedGradeHeader = $('<br><br><h2 class="dhdg_1 vui-heading-2">Final Calculated Grade</h2>');
     gradePageHeader.append(calculatedGradeHeader);
-
-    console.log("prepended?");
 }
 
 body.click(function(event) {
@@ -28,12 +24,22 @@ body.click(function(event) {
         the length check is a very scuffed way of making sure that the user is not
         switching classes via the waffle icon.
     */
-    if (text.includes("/") && text.length <= 12) {
+    if (text.includes("/")) {
 
         const args = text.split("/");
         const earned = args[0].trim();
         const worth = args[1].trim();
         const old = earned;
+
+        /*
+         so for some courses when switching they have combined sections the format is
+         TYPE123.12/25 I can avert the bug that I experienced by doing a quick parse and seeing if its NAN
+        */
+
+        let t = parseFloat(earned);
+        if (isNaN(t)) {
+            return;
+        }
 
         // var next = clicked.nextSibling;
         //
@@ -43,7 +49,6 @@ body.click(function(event) {
         //     console.log(nt);
         // }
 
-        // let newGrade = prompt("What points would you like to have on this?");
         var newGrade = null;
         var input = document.createElement("input");
         input.style.height = "30px";
@@ -58,8 +63,18 @@ body.click(function(event) {
                     jQuery(clicked).text(earned + " / " + worth);
                     alert("You didn't input a valid grade. Replaced to old.");
                 } else {
-                    input.remove();
-                    jQuery(clicked).text(newGrade + " / " + worth);
+                    try {
+                        input.remove();
+                    } catch (e) {
+
+                    }
+
+                    if(newGrade === null) {
+                        jQuery(clicked).text(earned + " / " + worth);
+                    } else {
+                        jQuery(clicked).text(newGrade + " / " + worth);
+
+                    }
                 }
             }
         }
@@ -71,8 +86,7 @@ body.click(function(event) {
             // inputted but not pressed "enter" to traditionally calculate.
             // as of right now think i should process
             var possible = event.target.value;
-            console.log(possible);
-            if(possible === null || isNaN(possible)) {
+            if(possible === null || isNaN(possible) || possible === '') {
                 input.remove();
                 jQuery(clicked).text(old + " / " + worth);
             } else {
@@ -81,7 +95,6 @@ body.click(function(event) {
             }
         }
         input.type = "text";
-
         input.placeholder = earned;
         jQuery(clicked).text("   / " + worth);
         clicked.prepend(input);
