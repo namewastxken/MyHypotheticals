@@ -15,9 +15,20 @@ if (!hasTotalGradeDisplayed) {
     gradePageHeader.append(calculatedGradeHeader);
 }
 
+/*
+ * notes:
+ * the whole grade table is under the table id of "z_h"
+ * sub cats of the grades i.e labs, exams, etc under a tr of class d_ggl1
+ * grade items are just under a tr with class d_gd
+ */
+
+/**
+ * this is the main function of allowing and performing grade altering
+ *
+ */
 body.click(function(event) {
-    let clicked = event.target;
-    let text = jQuery(clicked).text();
+    let clicked = $(event.target);
+    let text = clicked.text();
 
     /*
         this would determine if it is a grade item in format of EARNED / WORTH (i.e 98 / 100)
@@ -25,6 +36,22 @@ body.click(function(event) {
         switching classes via the waffle icon.
     */
     if (text.includes("/")) {
+        // console.log($($($(clicked.parent()).parent()).parent()).parent().closest('tr.d_ggl1'))
+        // console.log(clicked.parents().closest('tr.d_ggl1').html());
+        console.log(clicked.parents('tr').parent().find('tr.d_ggl1')) // gets all headers
+        /*
+        its going to be an absolute bitch to determine which grade item goes under which header due to their scheme and
+        /or the way that i'm doing this. im blaming them tho. anyways:
+        some key things:
+        calculate grade by iterating through every table item and adding worths and what not and effecting
+        the last seen header (so changing the header after next header is seen, or if it stops then change last one)
+
+        and then the easy step is to just get all headers and finding their values and then adding and boom final calc
+
+        however the main headache is going to be determining which col is effected (points or weight achieved)
+        and then changing the other one based on the new weight or point updated.
+        */
+
 
         const args = text.split("/");
         const earned = args[0].trim();
@@ -41,14 +68,6 @@ body.click(function(event) {
             return;
         }
 
-        // var next = clicked.nextSibling;
-        //
-        // if(next.nodeType === Node.TEXT_NODE) {
-        //     // is text?
-        //     var nt = next.nodeValue;
-        //     console.log(nt);
-        // }
-
         var newGrade = null;
         var input = document.createElement("input");
         input.style.height = "30px";
@@ -60,7 +79,7 @@ body.click(function(event) {
                 if(isNaN(newGrade)) {
                     // if input is invalid, return to already set grade
                     input.remove();
-                    jQuery(clicked).text(earned + " / " + worth);
+                    clicked.text(earned + " / " + worth);
                     alert("You didn't input a valid grade. Replaced to old.");
                 } else {
                     try {
@@ -70,9 +89,9 @@ body.click(function(event) {
                     }
 
                     if(newGrade === null) {
-                        jQuery(clicked).text(earned + " / " + worth);
+                        clicked.text(earned + " / " + worth);
                     } else {
-                        jQuery(clicked).text(newGrade + " / " + worth);
+                        clicked.text(newGrade + " / " + worth);
 
                     }
                 }
@@ -88,15 +107,15 @@ body.click(function(event) {
             var possible = event.target.value;
             if(possible === null || isNaN(possible) || possible === '') {
                 input.remove();
-                jQuery(clicked).text(old + " / " + worth);
+                clicked.text(old + " / " + worth);
             } else {
                 input.remove();
-                jQuery(clicked).text(newGrade + " / " + worth);
+                clicked.text(newGrade + " / " + worth);
             }
         }
         input.type = "text";
         input.placeholder = earned;
-        jQuery(clicked).text("   / " + worth);
+        clicked.text("   / " + worth);
         clicked.prepend(input);
         input.focus();
     }
