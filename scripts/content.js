@@ -38,18 +38,22 @@ body.click(function(event) {
     if (text.includes("/")) {
         // console.log($($($(clicked.parent()).parent()).parent()).parent().closest('tr.d_ggl1'))
         // console.log(clicked.parents().closest('tr.d_ggl1').html());
-        console.log(clicked.parents('tr').parent().find('tr.d_ggl1')) // gets all headers
+        // console.log(clicked.parents('tr').parent().find('tr.d_ggl1')) // gets all headers
+
+        console.log(clicked.parents('tr').first().children().eq(3).find('label').last().text()); // wa
+        console.log(clicked.parents('tr').first().children().eq(2).find('label').last().text()); // pts
+
         /*
-        its going to be an absolute bitch to determine which grade item goes under which header due to their scheme and
-        /or the way that i'm doing this. im blaming them tho. anyways:
-        some key things:
-        calculate grade by iterating through every table item and adding worths and what not and effecting
-        the last seen header (so changing the header after next header is seen, or if it stops then change last one)
+            its going to be an absolute bitch to determine which grade item goes under which header due to their scheme and
+            /or the way that i'm doing this. im blaming them tho. anyways:
+            some key things:
+            calculate grade by iterating through every table item and adding worths and what not and effecting
+            the last seen header (so changing the header after next header is seen, or if it stops then change last one)
 
-        and then the easy step is to just get all headers and finding their values and then adding and boom final calc
+            and then the easy step is to just get all headers and finding their values and then adding and boom final calc
 
-        however the main headache is going to be determining which col is effected (points or weight achieved)
-        and then changing the other one based on the new weight or point updated.
+            however the main headache is going to be determining which col is effected (points or weight achieved)
+            and then changing the other one based on the new weight or point updated.
         */
 
 
@@ -70,6 +74,9 @@ body.click(function(event) {
 
         var newGrade = null;
         var input = document.createElement("input");
+        var dataIndex = clicked.parents('td').first().index(); // the index of which table item was impacted.
+        // 2 = points & 3 = weight achieved
+
         input.style.height = "30px";
         input.style.width = "30px";
         input.onkeydown = function (event) {
@@ -80,7 +87,6 @@ body.click(function(event) {
                     // if input is invalid, return to already set grade
                     input.remove();
                     clicked.text(earned + " / " + worth);
-                    alert("You didn't input a valid grade. Replaced to old.");
                 } else {
                     try {
                         input.remove();
@@ -92,27 +98,43 @@ body.click(function(event) {
                         clicked.text(earned + " / " + worth);
                     } else {
                         clicked.text(newGrade + " / " + worth);
+                        if(dataIndex === 2) { // points column
+                            // if the field changed is points col change calculate the est new weight
+                            const weight = clicked.parents('tr').first().children().eq(3).find('label').last().text().split("/")[1];
+                            const precision = weight.split(".")[1].length; // # of decimals weight should round to
+                            const percentage = newGrade / worth; // percentage of points effected.
+                            const earnedWeight = (parseFloat(weight) * percentage).toFixed(precision); // weight earned
 
+                            // wField = the text of the weight achieved
+                            const wField = clicked.parents('tr').first().children().eq(3).find('label').last();
+                            wField.text(earnedWeight + " / " + weight);
+
+                        } else if (dataIndex === 3) { // weight column
+
+                            // to check if points column is used/displayed by the instructor. (this find will return 0)
+                            // therefore not needing to run the following code.
+                            const labelSearch = clicked.parents('tr').first().children().eq(2).find('label');
+                            if(labelSearch.length === 0) {
+                                return;
+                            }
+
+                            const maxPoints = clicked.parents('tr').first().children().eq(2).find('label').last().text().split("/")[1];
+                            const percentage = newGrade / worth; // percentage of points effected.
+                            const earnedPoints = (parseFloat(maxPoints) * percentage).toFixed(2); // weight earned
+
+                            // wField = the text of the weight achieved
+                            const pField = clicked.parents('tr').first().children().eq(2).find('label').last();
+                            pField.text(earnedPoints + " / " + maxPoints);
+                        }
                     }
                 }
             }
         }
 
-        // event listener on when a person clicks away.
-        // prevent clutter and other nastiness when clicking away.
         input.onblur = function (event) {
-            // possible is the variable for the possible grade input that a student could've
-            // inputted but not pressed "enter" to traditionally calculate.
-            // as of right now think i should process
-            var possible = event.target.value;
-            if(possible === null || isNaN(possible) || possible === '') {
-                input.remove();
-                clicked.text(old + " / " + worth);
-            } else {
-                input.remove();
-                clicked.text(newGrade + " / " + worth);
-            }
+            clicked.text(old + " / " + worth);
         }
+
         input.type = "text";
         input.placeholder = earned;
         clicked.text("   / " + worth);
