@@ -27,8 +27,8 @@ if (!hasTotalGradeDisplayed) {
  *
  */
 body.click(function(event) {
-    let clicked = $(event.target);
-    let text = clicked.text();
+    const clicked = $(event.target);
+    const text = clicked.text();
 
     /*
         this would determine if it is a grade item in format of EARNED / WORTH (i.e 98 / 100)
@@ -40,8 +40,8 @@ body.click(function(event) {
         // console.log(clicked.parents().closest('tr.d_ggl1').html());
         // console.log(clicked.parents('tr').parent().find('tr.d_ggl1')) // gets all headers
 
-        console.log(clicked.parents('tr').first().children().eq(3).find('label').last().text()); // wa
-        console.log(clicked.parents('tr').first().children().eq(2).find('label').last().text()); // pts
+        //console.log(clicked.parents('tr').first().children().eq(3).find('label').last().text()); // wa
+        //console.log(clicked.parents('tr').first().children().eq(2).find('label').last().text()); // pts
 
         /*
             its going to be an absolute bitch to determine which grade item goes under which header due to their scheme and
@@ -83,6 +83,7 @@ body.click(function(event) {
             if(event.key === "Enter") {
                 // if enter key
                 newGrade = parseFloat(event.target.value);
+                console.log(clicked.parents('td'));
                 if(isNaN(newGrade)) {
                     // if input is invalid, return to already set grade
                     input.remove();
@@ -98,6 +99,12 @@ body.click(function(event) {
                         clicked.text(earned + " / " + worth);
                     } else {
                         clicked.text(newGrade + " / " + worth);
+
+                        // if weird bug occurs (not sure as to why this occurs. It seems very random.)
+                        if (dataIndex === -1) {
+                            dataIndex = clicked.prev().first().index() + 1; // adding 1 bc the index is -1 of real val.
+                        }
+
                         if(dataIndex === 2) { // points column
                             // if the field changed is points col change calculate the est new weight
                             const weight = clicked.parents('tr').first().children().eq(3).find('label').last().text().split("/")[1];
@@ -125,13 +132,17 @@ body.click(function(event) {
                             // wField = the text of the weight achieved
                             const pField = clicked.parents('tr').first().children().eq(2).find('label').last();
                             pField.text(earnedPoints + " / " + maxPoints);
+                        } else {
+                            console.error("Severe error went wrong. Data index is " + dataIndex);
                         }
+
                     }
                 }
             }
         }
 
         input.onblur = function (event) {
+            console.log("onblur")
             clicked.text(old + " / " + worth);
         }
 
