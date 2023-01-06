@@ -228,14 +228,11 @@ function lazyCalculate(headers) {
         // leading things to go awry, and labels and info not being able to be found.
         // leads the values to be undefined and NaN to be outputted.
         // found a way thru console when bug happened to trace back and find the data.
-        console.log("prev elem" + $(this).prev());
         if(cEarned === undefined || isNaN(cEarned) || cWorth === undefined || isNaN(cWorth)) {
-            console.log("FOUND NAN TRYING TO CORRECt")
-            // data is found thru going to the previous element (tr of category), then going to this 3rd child which is
-            // weight achieved and then doing the previous logic to make it correct.
-            console.log($(this).prev().first().children())
-            console.log($(this).prev().first().children().eq(2).text())
-            const data = $(this).prev().first().children().eq(2).text().split(" / ");
+            // fix if something breaks for whichever reason
+            let display = $(this).children().eq(2).text();
+
+            const data = display.split(" / ");
             console.log(data[0] + " " + data[1]);
             cEarnedString = data[0];
             cWorthString = data[1];
