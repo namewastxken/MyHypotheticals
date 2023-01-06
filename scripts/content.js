@@ -221,6 +221,11 @@ function lazyCalculate(headers) {
             }
 
         });
+        // if the grade header is not set
+        if (cEarnedString === '-') {
+            return false;
+        }
+
         // weird bug where mycourses loads weird or something and the access to the label becomes misorganized.
         // leading things to go awry, and labels and info not being able to be found.
         // leads the values to be undefined and NaN to be outputted.
