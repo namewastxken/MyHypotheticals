@@ -205,6 +205,11 @@ function lazyCalculate(headers) {
                 cEarnedString = verification[0];
                 cWorthString = verification[1];
 
+                // check if the grade value was not set yet. would skip it
+                if(cEarnedString === '-') {
+                    return false;
+                }
+
                 cEarned = parseFloat(cEarnedString);
                 cWorth = parseFloat(cWorthString);
 
@@ -223,20 +228,31 @@ function lazyCalculate(headers) {
         // leading things to go awry, and labels and info not being able to be found.
         // leads the values to be undefined and NaN to be outputted.
         // found a way thru console when bug happened to trace back and find the data.
-        if(cEarned === undefined || isNaN(cEarned)) {
+        console.log("prev elem" + $(this).prev());
+        if(cEarned === undefined || isNaN(cEarned) || cWorth === undefined || isNaN(cWorth)) {
+            console.log("FOUND NAN TRYING TO CORRECt")
             // data is found thru going to the previous element (tr of category), then going to this 3rd child which is
             // weight achieved and then doing the previous logic to make it correct.
-            const data = $(this).parents('tr').first().children().eq(2).text().split(" / ");
+            console.log($(this).prev().first().children())
+            console.log($(this).prev().first().children().eq(2).text())
+            const data = $(this).prev().first().children().eq(2).text().split(" / ");
+            console.log(data[0] + " " + data[1]);
             cEarnedString = data[0];
             cWorthString = data[1];
 
             cEarned = parseFloat(cEarnedString);
             cWorth = parseFloat(cWorthString);
         }
+        console.log(isNaN(cEarned));
+        console.log(isNaN(cWorth));
+        console.log(cEarned);
+        console.log(cWorth);
+
 
         earned += cEarned; // add how much 'earned'
         total += cWorth; // add 'out of' points. (i.e what the category is worth)
     });
+    console.log(earned + " / " + total);
     const percent = ((earned / total) * 100).toFixed(2);
     displayedGradeLabel.text(earned.toFixed(2) + " / " + total.toFixed(2) + " (" + percent + "%)");
 }
