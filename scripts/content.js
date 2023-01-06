@@ -187,8 +187,7 @@ function lazyCalculate(headers) {
 
     // loop through each header
     headers.each(function() {
-        // I have to find the label that contains
-        console.log($(this).find('label'))
+        // console.log($(this).find('label'))
         let categoryGrade;
         let cEarnedString;
         let cWorthString;
@@ -240,16 +239,10 @@ function lazyCalculate(headers) {
             cEarned = parseFloat(cEarnedString);
             cWorth = parseFloat(cWorthString);
         }
-        console.log(isNaN(cEarned));
-        console.log(isNaN(cWorth));
-        console.log(cEarned);
-        console.log(cWorth);
-
 
         earned += cEarned; // add how much 'earned'
         total += cWorth; // add 'out of' points. (i.e what the category is worth)
     });
-    console.log(earned + " / " + total);
     const percent = ((earned / total) * 100).toFixed(2);
     displayedGradeLabel.text(earned.toFixed(2) + " / " + total.toFixed(2) + " (" + percent + "%)");
 }
