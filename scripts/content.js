@@ -199,6 +199,7 @@ function lazyCalculate(headers) {
             // have to make a loop because due to random reloads it will mess the order up of the labels
             // so it cannot be consitently perfect and useful. However, that's the fun part of programming right?
             if($(this).text().includes("/")) {
+                console.log("found potential match")
                 // just incase a prof sets a category entitled 'videos/notes' or something
                 const verification = $(this).text().split(" / ");
                 cEarnedString = verification[0];
@@ -212,6 +213,7 @@ function lazyCalculate(headers) {
                 // not to embedded in useless and empty information. i.e empty labels & various nested children
                 if(!isNaN(cEarned) && !isNaN(cWorth)) {
                     categoryGrade = verification;
+                    console.log("is a number and set to the verification split")
                     return false; // this is a break
                 }
             }
@@ -221,17 +223,20 @@ function lazyCalculate(headers) {
         // leading things to go awry, and labels and info not being able to be found.
         // leads the values to be undefined and NaN to be outputted.
         // found a way thru console when bug happened to trace back and find the data.
-        if(cEarned === undefined) {
+        if(cEarned === undefined || isNaN(cEarned)) {
+            // data is found thru going to the previous element (tr of category), then going to this 3rd child which is
+            // weight achieved and then doing the previous logic to make it correct.
+            const data = $(this).parents('tr').first().children().eq(2).text().split(" / ");
+            cEarnedString = data[0];
+            cWorthString = data[1];
 
+            cEarned = parseFloat(cEarnedString);
+            cWorth = parseFloat(cWorthString);
         }
 
-
-        console.log("'" + cEarnedString + "'")
-        console.log(cEarned);
         earned += cEarned; // add how much 'earned'
         total += cWorth; // add 'out of' points. (i.e what the category is worth)
     });
-    console.log(earned);
     const percent = ((earned / total) * 100).toFixed(2);
-    displayedGradeLabel.text(earned + " / " + total + " (" + percent + "%)");
+    displayedGradeLabel.text(earned.toFixed(2) + " / " + total.toFixed(2) + " (" + percent + "%)");
 }
