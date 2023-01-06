@@ -8,12 +8,20 @@ console.log(hasTotalGradeDisplayed)
  * a prepended informational booth injected into the site
  * since it has not been added by the instructor
  */
+
+var displayedGradeLabel; // the label of the displayed final grade to be edited
+
 if (!hasTotalGradeDisplayed) {
     // started the way to input final calculated grade if not already provided.
     const gradePageHeader = $('#d_page_title');
     const calculatedGradeHeader = $('<br><br><h2 class="dhdg_1 vui-heading-2">Final Calculated Grade</h2>');
     gradePageHeader.append(calculatedGradeHeader);
+} else {
+    displayedGradeLabel = body.find('table.d_FG').children().children().last().children().children().
+    first().children().first().children().find('label').last(); // a very ugly way of interacting with mycourses to get
+                                                                // the label
 }
+
 
 /*
  * notes:
@@ -61,6 +69,7 @@ body.click(function(event) {
         const earned = args[0].trim();
         const worth = args[1].trim();
         const old = earned;
+        const categories = clicked.parents('tr').parent().find('tr.d_ggl1');
 
         /*
          so for some courses when switching they have combined sections the format is
@@ -86,7 +95,7 @@ body.click(function(event) {
             if(event.key === "Enter") {
                 // if enter key
                 newGrade = parseFloat(event.target.value);
-                console.log(clicked.parents('td'));
+                // console.log(clicked.parents('td'));
                 if(isNaN(newGrade)) {
                     // if input is invalid, return to already set grade
                     try {
@@ -111,9 +120,10 @@ body.click(function(event) {
                         if (dataIndex === -1) {
                             dataIndex = clicked.prev().first().index() + 1; // adding 1 bc the index is -1 of real val.
                         }
-
+                        // console.log(dataIndex);
                         if (isCategory) {
-
+                            // changes a whole category, instead of a spceific assignemnt. so can use lazy calculate
+                            lazyCalculate(categories);
                             return;
                         }
 
@@ -165,6 +175,63 @@ body.click(function(event) {
     }
 });
 
-function lazyCalculate() {
+/**
+ * Function to laily calculate a hypothetical grade based on when a person changes a FULL category total
+ * Lazy calculation is completed by adding all current categories weights and changing the main display.
+ * @param headers - a jquery list of the grade headers / categories within (i.e Exams, Labs, Homework)
+ */
+function lazyCalculate(headers) {
+    // create and assign default earned and total values
+    let earned = 0
+    let total = 0;
 
+    // loop through each header
+    headers.each(function() {
+        // I have to find the label that contains
+        console.log($(this).find('label'))
+        let categoryGrade;
+        let cEarnedString;
+        let cWorthString;
+        let cEarned;
+        let cWorth;
+
+        $(this).find('label').each(function() {
+            // have to make a loop because due to random reloads it will mess the order up of the labels
+            // so it cannot be consitently perfect and useful. However, that's the fun part of programming right?
+            if($(this).text().includes("/")) {
+                // just incase a prof sets a category entitled 'videos/notes' or something
+                const verification = $(this).text().split(" / ");
+                cEarnedString = verification[0];
+                cWorthString = verification[1];
+
+                cEarned = parseFloat(cEarnedString);
+                cWorth = parseFloat(cWorthString);
+
+                // if both parse correctly, it must be the actual grade label so we can assign the label and do the main math.
+                // this time complexity kinda sucks, i wish it was able to be consistent. and for myvcourses to be
+                // not to embedded in useless and empty information. i.e empty labels & various nested children
+                if(!isNaN(cEarned) && !isNaN(cWorth)) {
+                    categoryGrade = verification;
+                    return false; // this is a break
+                }
+            }
+
+        });
+        // weird bug where mycourses loads weird or something and the access to the label becomes misorganized.
+        // leading things to go awry, and labels and info not being able to be found.
+        // leads the values to be undefined and NaN to be outputted.
+        // found a way thru console when bug happened to trace back and find the data.
+        if(cEarned === undefined) {
+
+        }
+
+
+        console.log("'" + cEarnedString + "'")
+        console.log(cEarned);
+        earned += cEarned; // add how much 'earned'
+        total += cWorth; // add 'out of' points. (i.e what the category is worth)
+    });
+    console.log(earned);
+    const percent = ((earned / total) * 100).toFixed(2);
+    displayedGradeLabel.text(earned + " / " + total + " (" + percent + "%)");
 }
