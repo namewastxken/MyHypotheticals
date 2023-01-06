@@ -72,9 +72,12 @@ body.click(function(event) {
             return;
         }
 
-        var newGrade = null;
-        var input = document.createElement("input");
-        var dataIndex = clicked.parents('td').first().index(); // the index of which table item was impacted.
+        let newGrade = null;
+        let input = document.createElement("input");
+        // this is a boolean to represent if a student is editing a full grade category instead of a single assignment.
+        // the reason why i i am checking specifically for tr.d_ggl1 is bc category tr's have d_ggl1 assigned to them.
+        const isCategory = clicked.parents('tr.d_ggl1').length !== 0; // if > 0 (1) it is cat
+        let dataIndex = clicked.parents('td').first().index(); // the index of which table item was impacted.
         // 2 = points & 3 = weight achieved
 
         input.style.height = "30px";
@@ -86,7 +89,11 @@ body.click(function(event) {
                 console.log(clicked.parents('td'));
                 if(isNaN(newGrade)) {
                     // if input is invalid, return to already set grade
-                    input.remove();
+                    try {
+                        input.remove();
+                    } catch (e) {
+
+                    }
                     clicked.text(earned + " / " + worth);
                 } else {
                     try {
@@ -103,6 +110,11 @@ body.click(function(event) {
                         // if weird bug occurs (not sure as to why this occurs. It seems very random.)
                         if (dataIndex === -1) {
                             dataIndex = clicked.prev().first().index() + 1; // adding 1 bc the index is -1 of real val.
+                        }
+
+                        if (isCategory) {
+
+                            return;
                         }
 
                         if(dataIndex === 2) { // points column
@@ -142,7 +154,6 @@ body.click(function(event) {
         }
 
         input.onblur = function (event) {
-            console.log("onblur")
             clicked.text(old + " / " + worth);
         }
 
@@ -153,3 +164,7 @@ body.click(function(event) {
         input.focus();
     }
 });
+
+function lazyCalculate() {
+
+}
