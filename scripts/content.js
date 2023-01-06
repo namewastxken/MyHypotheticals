@@ -198,7 +198,6 @@ function lazyCalculate(headers) {
             // have to make a loop because due to random reloads it will mess the order up of the labels
             // so it cannot be consitently perfect and useful. However, that's the fun part of programming right?
             if($(this).text().includes("/")) {
-                console.log("found potential match")
                 // just incase a prof sets a category entitled 'videos/notes' or something
                 const verification = $(this).text().split(" / ");
                 cEarnedString = verification[0];
@@ -217,7 +216,6 @@ function lazyCalculate(headers) {
                 // not to embedded in useless and empty information. i.e empty labels & various nested children
                 if(!isNaN(cEarned) && !isNaN(cWorth)) {
                     categoryGrade = verification;
-                    console.log("is a number and set to the verification split")
                     return false; // this is a break
                 }
             }
@@ -232,7 +230,7 @@ function lazyCalculate(headers) {
             let display = $(this).children().eq(2).text();
 
             const data = display.split(" / ");
-            console.log(data[0] + " " + data[1]);
+            // console.log(data[0] + " " + data[1]);
             cEarnedString = data[0];
             cWorthString = data[1];
 
