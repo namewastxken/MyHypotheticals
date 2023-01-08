@@ -94,8 +94,8 @@ body.click(function(event) {
         let newGrade = null;
         let input = document.createElement("input");
         // this is a boolean to represent if a student is editing a full grade category instead of a single assignment.
-        // the reason why i i am checking specifically for tr.d_ggl1 is bc category tr's have d_ggl1 assigned to them.
-        const isCategory = clicked.parents('tr.d_ggl1').length !== 0; // if > 0 (1) it is cat
+        // categories (or interchangebly headers) have class d_ggl1 assigned to them.
+        const isCategory = clicked.hasClass('d_ggl1');
         let dataIndex = clicked.parents('td').first().index(); // the index of which table item was impacted.
         // 2 = points & 3 = weight achieved
 
@@ -167,7 +167,7 @@ body.click(function(event) {
                         } else {
                             console.error("Severe error went wrong. Data index is " + dataIndex);
                         }
-
+                        fullCalculate(clicked.parents('tbody').first(), categories);
                     }
                 }
             }
@@ -197,7 +197,6 @@ function lazyCalculate(headers) {
 
     // loop through each header
     headers.each(function() {
-        // console.log($(this).find('label'))
         let categoryGrade;
         let cEarnedString;
         let cWorthString;
@@ -245,7 +244,6 @@ function lazyCalculate(headers) {
             let display = $(this).children().eq(2).text();
 
             const data = display.split(" / ");
-            // console.log(data[0] + " " + data[1]);
             cEarnedString = data[0];
             cWorthString = data[1];
 
@@ -258,4 +256,54 @@ function lazyCalculate(headers) {
     });
     const percent = ((earned / total) * 100).toFixed(2);
     displayedGradeLabel.text(earned.toFixed(2) + " / " + total.toFixed(2) + " (" + percent + "%)");
+}
+
+/**
+ * A function that does the full complete calculation of a students based on changes of
+ * assignment items.
+ * @param tableBody - the table of grades in mycourses
+ * @param categories - the list of assignment categories
+ */
+function fullCalculate(tableBody, categories) {
+
+    let lastHeader = null;
+    let earnedWeight = 0;
+    let totalWeight = 0;
+
+    tableBody.children().each(function() {
+        if($(this).hasClass('d2l-table-row-first')) return;
+
+        let isHeader = $(this).hasClass('d_ggl1'); // categories have class d_ggl1
+
+        if (isHeader) {
+            if(lastHeader === null) {
+                lastHeader = $(this);
+            } else {
+                $(lastHeader).children().eq(2).text(earnedWeight.toFixed(2) + " / " + totalWeight.toFixed(0));
+                earnedWeight = 0
+                totalWeight = 0;
+                lastHeader = $(this);
+            }
+        } else {
+            let display = $(this).children().eq(3).text();
+            const data = display.split(" / ");
+
+            let wEarnedString = data[0];
+            let wWorthString = data[1];
+
+            let wEarned = parseFloat(wEarnedString);
+            let cWorth = parseFloat(wWorthString);
+            // only effect if it has been set
+            if (wEarnedString !== '-') {
+                earnedWeight += wEarned;
+                totalWeight += cWorth;
+            }
+        }
+    });
+
+    // last header wont be calculated in loop, so manually do it outside since last data will be populated in the variables.
+    $(lastHeader).children().eq(2).text(earnedWeight.toFixed(2) + " / " + totalWeight.toFixed(0));
+
+    // use lazy calculate to do the rest.
+    lazyCalculate(categories);
 }
