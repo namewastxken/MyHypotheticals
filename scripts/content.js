@@ -145,13 +145,17 @@ body.click(function(event) {
 
                         if(dataIndex === 2) { // points column
                             // if the field changed is points col change calculate the est new weight
-                            const weight = clicked.parents('tr').first().children().eq(3).find('label').last().text().split("/")[1];
-                            const precision = weight.split(".")[1].length; // # of decimals weight should round to
+                            const weight = clicked.parents('tr').first().children().eq(2).find('label').last().text().split("/")[1];
+                            let precision = 0; // set it to no decimal places default
+                            // if the weight has a decimal in it then update the precision
+                            if (weight.includes(".")) {
+                                 precision = weight.split(".")[1].length; // # of decimals weight should round to
+                            }
                             const percentage = newGrade / worth; // percentage of points effected.
                             const earnedWeight = (parseFloat(weight) * percentage).toFixed(precision); // weight earned
 
                             // wField = the text of the weight achieved
-                            const wField = clicked.parents('tr').first().children().eq(3).find('label').last();
+                            const wField = clicked.parents('tr').first().children().eq(2).find('label').last();
                             wField.text(earnedWeight + " / " + weight);
 
                         } else if (dataIndex === 3) { // weight column
