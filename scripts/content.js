@@ -36,11 +36,23 @@ if (!hasTotalGradeDisplayed) {
  * grade items are just under a tr with class d_gd
  */
 
+/*
+ * Assign where points and weight are located in a professors mycourses layout
+ */
+
+let pointsIndex = -1;
+let weightIndex = -1;
+setIndexes();
+
 /**
  * this is the main function of allowing and performing grade altering
  *
  */
 body.click(function(event) {
+    if(pointsIndex === -1 || weightIndex === -1) {
+        setIndexes();
+    }
+
     const clicked = $(event.target);
     const text = clicked.text();
 
@@ -95,10 +107,8 @@ body.click(function(event) {
         let input = document.createElement("input");
         // this is a boolean to represent if a student is editing a full grade category instead of a single assignment.
         // categories (or interchangebly headers) have class d_ggl1 assigned to them.
-        const isCategory = clicked.hasClass('d_ggl1');
+        const isCategory = clicked.parents('tr').first().hasClass('d_ggl1');
         let dataIndex = clicked.parents('td').first().index(); // the index of which table item was impacted.
-        // 2 = points & 3 = weight achieved
-
         input.style.height = "30px";
         input.style.width = "30px";
         input.onkeydown = function (event) {
@@ -111,7 +121,6 @@ body.click(function(event) {
             if(event.key === "Enter") {
                 // if enter key
                 newGrade = parseFloat(event.target.value);
-                // console.log(clicked.parents('td'));
                 if(isNaN(newGrade)) {
                     // if input is invalid, return to already set grade
                     try {
@@ -133,19 +142,19 @@ body.click(function(event) {
                         clicked.text(newGrade + " / " + worth);
 
                         // if weird bug occurs (not sure as to why this occurs. It seems very random.)
-                        if (dataIndex === -1) {
-                            dataIndex = clicked.prev().first().index() + 1; // adding 1 bc the index is -1 of real val.
+                        if (dataIndex < 0) {
+                            dataIndex = clicked.prev().first().index() + 1;
                         }
                         // console.log(dataIndex);
                         if (isCategory) {
-                            // changes a whole category, instead of a spceific assignemnt. so can use lazy calculate
+                            // changes a whole category, instead of a specific assignment. so can use lazy calculate
                             lazyCalculate(categories);
                             return;
                         }
 
-                        if(dataIndex === 2) { // points column
+                        if(dataIndex === pointsIndex) { // points column
                             // if the field changed is points col change calculate the est new weight
-                            const weight = clicked.parents('tr').first().children().eq(2).find('label').last().text().split("/")[1];
+                            const weight = clicked.parents('tr').first().children().eq(weightIndex).find('label').last().text().split("/")[1];
                             let precision = 0; // set it to no decimal places default
                             // if the weight has a decimal in it then update the precision
                             if (weight.includes(".")) {
@@ -155,25 +164,23 @@ body.click(function(event) {
                             const earnedWeight = (parseFloat(weight) * percentage).toFixed(precision); // weight earned
 
                             // wField = the text of the weight achieved
-                            const wField = clicked.parents('tr').first().children().eq(2).find('label').last();
+                            const wField = clicked.parents('tr').first().children().eq(weightIndex).find('label').last();
                             wField.text(earnedWeight + " / " + weight);
 
-                        } else if (dataIndex === 3) { // weight column
+                        } else if (dataIndex === weightIndex) { // weight column
 
                             // to check if points column is used/displayed by the instructor. (this find will return 0)
                             // therefore not needing to run the following code.
-                            const labelSearch = clicked.parents('tr').first().children().eq(2).find('label');
-                            if(labelSearch.length === 0) {
-                                return;
+                            const labelSearch = clicked.parents('tr').first().children().eq(pointsIndex).find('label');
+                            if(labelSearch.length > 0) {
+                                const maxPoints = clicked.parents('tr').first().children().eq(pointsIndex).find('label').last().text().split("/")[1];
+                                const percentage = newGrade / worth; // percentage of points effected.
+                                const earnedPoints = (parseFloat(maxPoints) * percentage).toFixed(2); // weight earned
+
+                                // pointField = the text of the points earned
+                                const pField = clicked.parents('tr').first().children().eq(pointsIndex).find('label').last();
+                                pField.text(earnedPoints + " / " + maxPoints);
                             }
-
-                            const maxPoints = clicked.parents('tr').first().children().eq(2).find('label').last().text().split("/")[1];
-                            const percentage = newGrade / worth; // percentage of points effected.
-                            const earnedPoints = (parseFloat(maxPoints) * percentage).toFixed(2); // weight earned
-
-                            // wField = the text of the weight achieved
-                            const pField = clicked.parents('tr').first().children().eq(2).find('label').last();
-                            pField.text(earnedPoints + " / " + maxPoints);
                         } else {
                             console.error("Severe error went wrong. Data index is " + dataIndex);
                         }
@@ -207,39 +214,12 @@ function lazyCalculate(headers) {
 
     // loop through each header
     headers.each(function() {
-        let categoryGrade;
-        let cEarnedString;
-        let cWorthString;
-        let cEarned;
-        let cWorth;
+        let categoryGrade = $(this).children().eq(weightIndex - 1);
+        let cEarnedString = categoryGrade[0];
+        let cWorthString = categoryGrade[1];
+        let cEarned = parseFloat(cEarnedString);
+        let cWorth = parseFloat(cWorthString);
 
-        $(this).find('label').each(function() {
-            // have to make a loop because due to random reloads it will mess the order up of the labels
-            // so it cannot be consitently perfect and useful. However, that's the fun part of programming right?
-            if($(this).text().includes("/")) {
-                // just incase a prof sets a category entitled 'videos/notes' or something
-                const verification = $(this).text().split(" / ");
-                cEarnedString = verification[0];
-                cWorthString = verification[1];
-
-                // check if the grade value was not set yet. would skip it
-                if(cEarnedString === '-') {
-                    return false;
-                }
-
-                cEarned = parseFloat(cEarnedString);
-                cWorth = parseFloat(cWorthString);
-
-                // if both parse correctly, it must be the actual grade label so we can assign the label and do the main math.
-                // this time complexity kinda sucks, i wish it was able to be consistent. and for myvcourses to be
-                // not to embedded in useless and empty information. i.e empty labels & various nested children
-                if(!isNaN(cEarned) && !isNaN(cWorth)) {
-                    categoryGrade = verification;
-                    return false; // this is a break
-                }
-            }
-
-        });
         // if the grade header is not set
         if (cEarnedString === '-') {
             return false;
@@ -251,7 +231,7 @@ function lazyCalculate(headers) {
         // found a way thru console when bug happened to trace back and find the data.
         if(cEarned === undefined || isNaN(cEarned) || cWorth === undefined || isNaN(cWorth)) {
             // fix if something breaks for whichever reason
-            let display = $(this).children().eq(2).text();
+            let display = $(this).children().eq(weightIndex - 1).text();
 
             const data = display.split(" / ");
             cEarnedString = data[0];
@@ -281,7 +261,7 @@ function fullCalculate(tableBody, categories) {
     let lastHeader = null;
     let earnedWeight = 0;
     let totalWeight = 0;
-
+    let weightDisplayIndex = weightIndex - 1;
     tableBody.children().each(function() {
         if($(this).hasClass('d2l-table-row-first')) return;
 
@@ -291,31 +271,67 @@ function fullCalculate(tableBody, categories) {
             if(lastHeader === null) {
                 lastHeader = $(this);
             } else {
-                $(lastHeader).children().eq(2).text(earnedWeight.toFixed(2).toString() + " / " + totalWeight.toFixed(0).toString());
-                earnedWeight = 0
+                $(lastHeader).children().eq(weightDisplayIndex).text(earnedWeight.toFixed(2).toString() + " / " + totalWeight.toFixed(0).toString());
+                earnedWeight = 0;
                 totalWeight = 0;
                 lastHeader = $(this);
             }
         } else {
-            let display = $(this).children().eq(3).text();
-            const data = display.split(" / ");
+            let display = $(this).children().eq(weightIndex).text();
 
-            let wEarnedString = data[0];
-            let wWorthString = data[1];
+            if(!display.includes("/")) {
+                let worthSomething = !isNaN(parseFloat(display));
+                if (worthSomething) {
+                    // there was a case where extra credit was given through just adding points and not
+                    // adding an assignment which caused bugs. this is to counter that.
+                    earnedWeight += parseFloat(display);
+                }
 
-            let wEarned = parseFloat(wEarnedString);
-            let cWorth = parseFloat(wWorthString);
-            // only effect if it has been set
-            if (wEarnedString !== '-') {
-                earnedWeight += wEarned;
-                totalWeight += cWorth;
+            } else {
+                const data = display.split(" / ");
+
+                let wEarnedString = data[0];
+                let wWorthString = data[1];
+
+                let dropped = false;
+                if (wEarnedString.includes("Dropped") || wWorthString.includes("Dropped")) {
+                    dropped = true;
+                }
+
+                let e = parseFloat(wEarnedString);
+                let w = parseFloat(wWorthString);
+                // only effect if it has been set and not dropped.
+                if (wEarnedString !== '-' && !dropped) {
+                    earnedWeight += e;
+                    totalWeight += w;
+                }
             }
         }
     });
 
     // last header wont be calculated in loop, so manually do it outside since last data will be populated in the variables.
-    $(lastHeader).children().eq(2).text(earnedWeight.toFixed(2).toString() + " / " + totalWeight.toFixed(0).toString());
+    $(lastHeader).children().eq(weightDisplayIndex).text(earnedWeight.toFixed(2).toString() + " / " + totalWeight.toFixed(0).toString());
 
     // use lazy calculate to do the rest.
     lazyCalculate(categories);
+}
+
+/**
+ * This sets the indexes of where points and weight are in the context
+ * of table rows within the grade table data.
+ *
+ * this is ran one of two times (on site load) but if it runs before the table is loaded
+ * it would cause indexes to not be set
+ * so the next time is when someone clicks on the site, and it is then set.
+ */
+function setIndexes() {
+    const gradeTableHeader = $('#z_h').find('tr.d2l-table-row-first').first();
+
+    gradeTableHeader.children().each(function() {
+        if($(this).text().includes("Points")) {
+            pointsIndex = $(this).index() + 1; // add one due to having a "ghost" cell in row
+        } else if ($(this).text().includes("Weight Achieved")) {
+            weightIndex = $(this).index() + 1; // add one due to having a ghost cell in row.
+        }
+    });
 }
