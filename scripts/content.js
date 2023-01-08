@@ -186,7 +186,7 @@ body.click(function(event) {
 });
 
 /**
- * Function to laily calculate a hypothetical grade based on when a person changes a FULL category total
+ * Function to lazily calculate a hypothetical grade based on when a person changes a FULL category total
  * Lazy calculation is completed by adding all current categories weights and changing the main display.
  * @param headers - a jquery list of the grade headers / categories within (i.e Exams, Labs, Homework)
  */
@@ -265,6 +265,8 @@ function lazyCalculate(headers) {
  * @param categories - the list of assignment categories
  */
 function fullCalculate(tableBody, categories) {
+    //TODO add support for points column for full calculate in the headers (lazy can be ignored)
+    //TODO add support for removing assignments (- assignment) (makes it empty & not calculated)
 
     let lastHeader = null;
     let earnedWeight = 0;
