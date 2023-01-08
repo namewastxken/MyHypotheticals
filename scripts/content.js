@@ -281,7 +281,7 @@ function fullCalculate(tableBody, categories) {
             if(lastHeader === null) {
                 lastHeader = $(this);
             } else {
-                $(lastHeader).children().eq(2).text(earnedWeight.toFixed(2) + " / " + totalWeight.toFixed(0));
+                $(lastHeader).children().eq(2).text(earnedWeight.toFixed(2).toString() + " / " + totalWeight.toFixed(0).toString());
                 earnedWeight = 0
                 totalWeight = 0;
                 lastHeader = $(this);
@@ -304,7 +304,7 @@ function fullCalculate(tableBody, categories) {
     });
 
     // last header wont be calculated in loop, so manually do it outside since last data will be populated in the variables.
-    $(lastHeader).children().eq(2).text(earnedWeight.toFixed(2) + " / " + totalWeight.toFixed(0));
+    $(lastHeader).children().eq(2).text(earnedWeight.toFixed(2).toString() + " / " + totalWeight.toFixed(0).toString());
 
     // use lazy calculate to do the rest.
     lazyCalculate(categories);
