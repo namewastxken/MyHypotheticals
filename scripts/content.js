@@ -102,6 +102,12 @@ body.click(function(event) {
         input.style.height = "30px";
         input.style.width = "30px";
         input.onkeydown = function (event) {
+
+            if(event.key === "Escape") {
+                clicked.text(old + " / " + worth);
+                return;
+            }
+
             if(event.key === "Enter") {
                 // if enter key
                 newGrade = parseFloat(event.target.value);
