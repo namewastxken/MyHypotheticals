@@ -9,6 +9,13 @@ let hasTotalGradeDisplayed = body.text().includes("Final Calculated Grade");
  */
 
 let displayedGradeLabel; // the label of the displayed final grade to be edited
+/*
+ * Assign where points and weight are located in a professors mycourses layout
+ */
+
+let pointsIndex = -1;
+let weightIndex = -1;
+setIndexes();
 
 if (!hasTotalGradeDisplayed) {
     // started the way to input final calculated grade if not already provided.
@@ -36,14 +43,6 @@ if (!hasTotalGradeDisplayed) {
  * grade items are just under a tr with class d_gd
  */
 
-/*
- * Assign where points and weight are located in a professors mycourses layout
- */
-
-let pointsIndex = -1;
-let weightIndex = -1;
-setIndexes();
-
 /**
  * this is the main function of allowing and performing grade altering
  *
@@ -52,7 +51,8 @@ body.click(function(event) {
     if(pointsIndex === -1 || weightIndex === -1) {
         setIndexes();
     }
-
+    console.log(pointsIndex);
+    console.log(weightIndex);
     const clicked = $(event.target);
     const text = clicked.text();
 
