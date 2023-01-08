@@ -2,20 +2,26 @@
 const body = $('body')
 
 let hasTotalGradeDisplayed = body.text().includes("Final Calculated Grade");
-console.log(hasTotalGradeDisplayed)
 
 /**
  * a prepended informational booth injected into the site
  * since it has not been added by the instructor
  */
 
-var displayedGradeLabel; // the label of the displayed final grade to be edited
+let displayedGradeLabel; // the label of the displayed final grade to be edited
 
 if (!hasTotalGradeDisplayed) {
     // started the way to input final calculated grade if not already provided.
     const gradePageHeader = $('#d_page_title');
     const calculatedGradeHeader = $('<br><br><h2 class="dhdg_1 vui-heading-2">Final Calculated Grade</h2>');
+    const weightAchievedLabel = $('<label id="ctl_3" class="d2l-label"><span>Weight Achieved</span></label>');
+    const display = $('<h3 id="gradeDisplay">0 / 0</h3>')
     gradePageHeader.append(calculatedGradeHeader);
+    gradePageHeader.append(weightAchievedLabel);
+    gradePageHeader.append(display);
+    displayedGradeLabel = $('#gradeDisplay')
+    const headers = $('#z_a').children('tbody').first().find('tr.d_ggl1');
+    lazyCalculate(headers);
 } else {
     displayedGradeLabel = body.find('table.d_FG').children().children().last().children().children().
     first().children().first().children().find('label').last(); // a very ugly way of interacting with mycourses to get
@@ -37,6 +43,10 @@ if (!hasTotalGradeDisplayed) {
 body.click(function(event) {
     const clicked = $(event.target);
     const text = clicked.text();
+
+    if(clicked.is(displayedGradeLabel)) {
+        return;
+    }
 
     /*
         this would determine if it is a grade item in format of EARNED / WORTH (i.e 98 / 100)
